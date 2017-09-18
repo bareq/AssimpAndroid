@@ -18,7 +18,6 @@
 #include "modelAssimp.h"
 
 
-#include "assimp/Importer.hpp"
 #include <opencv2/opencv.hpp>
 #include <myJNIHelper.h>
 
@@ -32,7 +31,7 @@ ModelAssimp::ModelAssimp() {
 
     // create MyGLCamera object and set default position for the object
     myGLCamera = new MyGLCamera();
-    float pos[]={0.,0.,0.,0.2,0.5,0.};
+    float pos[] = {0., 0., 0., 0.2, 0.5, 0.};
     std::copy(&pos[0], &pos[5], std::back_inserter(modelDefaultPosition));
     myGLCamera->SetModelPosition(modelDefaultPosition);
 
@@ -63,11 +62,9 @@ void ModelAssimp::PerformGLInits() {
 
     // extract the OBJ and companion files from assets
     std::string objFilename, mtlFilename, texFilename;
-    bool isFilesPresent  =
-            gHelperObject->ExtractAssetReturnFilename("amenemhat/amenemhat.obj", objFilename) &&
-            gHelperObject->ExtractAssetReturnFilename("amenemhat/amenemhat.mtl", mtlFilename) &&
-            gHelperObject->ExtractAssetReturnFilename("amenemhat/amenemhat.jpg", texFilename);
-    if( !isFilesPresent ) {
+    bool isFilesPresent =
+            gHelperObject->ExtractAssetReturnFilename("kosciol/kosciol.dae", objFilename);
+    if (!isFilesPresent) {
         MyLOGE("Model %s does not exist!", objFilename.c_str());
         return;
     }

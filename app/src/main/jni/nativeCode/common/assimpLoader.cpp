@@ -17,6 +17,7 @@
 #include "assimpLoader.h"
 #include "myShader.h"
 #include "misc.h"
+#include "../../../../../../../../../Library/Android/sdk/ndk-bundle/platforms/android-24/arch-arm/usr/include/GLES/gl.h"
 #include <opencv2/opencv.hpp>
 
 
@@ -29,13 +30,13 @@ AssimpLoader::AssimpLoader() {
     isObjectLoaded = false;
 
     // shader related setup -- loading, attribute and uniform locations
-    std::string vertexShader    = "shaders/modelTextured.vsh";
-    std::string fragmentShader  = "shaders/modelTextured.fsh";
-    shaderProgramID         = LoadShaders(vertexShader, fragmentShader);
-    vertexAttribute         = GetAttributeLocation(shaderProgramID, "vertexPosition");
-    vertexUVAttribute       = GetAttributeLocation(shaderProgramID, "vertexUV");
-    mvpLocation             = GetUniformLocation(shaderProgramID, "mvpMat");
-    textureSamplerLocation  = GetUniformLocation(shaderProgramID, "textureSampler");
+    std::string vertexShader = "shaders/modelTextured.vsh";
+    std::string fragmentShader = "shaders/modelTextured.fsh";
+    shaderProgramID = LoadShaders(vertexShader, fragmentShader);
+    vertexAttribute = GetAttributeLocation(shaderProgramID, "vertexPosition");
+    vertexUVAttribute = GetAttributeLocation(shaderProgramID, "vertexUV");
+    mvpLocation = GetUniformLocation(shaderProgramID, "mvpMat");
+    textureSamplerLocation = GetUniformLocation(shaderProgramID, "textureSampler");
 
     CheckGLError("AssimpLoader::AssimpLoader");
 }
@@ -45,7 +46,7 @@ AssimpLoader::AssimpLoader() {
  */
 AssimpLoader::~AssimpLoader() {
     Delete3DModel();
-    if(importerPtr) {
+    if (importerPtr) {
         delete importerPtr;
         importerPtr = NULL;
     }
@@ -64,7 +65,7 @@ void AssimpLoader::GenerateGLBuffers() {
     // also copy texture index for mesh into newMeshInfo.textureIndex
     for (unsigned int n = 0; n < scene->mNumMeshes; ++n) {
 
-        const aiMesh *mesh = scene->mMeshes[n]; // read the n-th mesh
+        aiMesh *mesh = scene->mMeshes[n]; // read the n-th mesh
 
         // create array with faces
         // convert from Assimp's format to array for GLES
@@ -109,7 +110,7 @@ void AssimpLoader::GenerateGLBuffers() {
         // ***ASSUMPTION*** -- handle only one texture for each mesh
         if (mesh->HasTextureCoords(0)) {
 
-            float * textureCoords = new float[2 * mesh->mNumVertices];
+            float *textureCoords = new float[2 * mesh->mNumVertices];
             for (unsigned int k = 0; k < mesh->mNumVertices; ++k) {
                 textureCoords[k * 2] = mesh->mTextureCoords[0][k].x;
                 textureCoords[k * 2 + 1] = mesh->mTextureCoords[0][k].y;
@@ -130,7 +131,7 @@ void AssimpLoader::GenerateGLBuffers() {
 
         // copy texture index (= texture name in GL) for the mesh from textureNameMap
         aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
-        aiString texturePath;	//contains filename of texture
+        aiString texturePath;    //contains filename of texture
         if (AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath)) {
             unsigned int textureId = textureNameMap[texturePath.data];
             newMeshInfo.textureIndex = textureId;
@@ -172,7 +173,7 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
     MyLOGI("Total number of textures is %d ", numTextures);
 
     // create and fill array with texture names in GL
-    GLuint * textureGLNames = new GLuint[numTextures];
+    GLuint *textureGLNames = new GLuint[numTextures];
     glGenTextures(numTextures, textureGLNames);
 
     // Extract the directory part from the file name
@@ -186,7 +187,7 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
 
         std::string textureFilename = (*textureIterator).first;  // get filename
         std::string textureFullPath = modelDirectoryName + "/" + textureFilename;
-        (*textureIterator).second = textureGLNames[i];	  // save texture id for filename in map
+        (*textureIterator).second = textureGLNames[i];      // save texture id for filename in map
 
         // load the texture using OpenCV
         MyLOGI("Loading texture %s", textureFullPath.c_str());
@@ -233,7 +234,8 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
 bool AssimpLoader::Load3DModel(std::string modelFilename) {
 
     MyLOGI("Scene will be imported now");
-    scene = importerPtr->ReadFile(modelFilename, aiProcessPreset_TargetRealtime_Quality);
+    scene = importerPtr->ReadFile(modelFilename, aiProcessPreset_TargetRealtime_Quality |
+                                                 aiProcess_PreTransformVertices);
 
     // Check if import failed
     if (!scene) {
@@ -243,7 +245,7 @@ bool AssimpLoader::Load3DModel(std::string modelFilename) {
     }
     MyLOGI("Imported %s successfully.", modelFilename.c_str());
 
-    if(!LoadTexturesToGL(modelFilename)) {
+    if (!LoadTexturesToGL(modelFilename)) {
         MyLOGE("Unable to load textures");
         return false;
     }
@@ -296,7 +298,7 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
 
         // Texture
         if (modelMeshes[n].textureIndex) {
-            glBindTexture( GL_TEXTURE_2D, modelMeshes[n].textureIndex);
+            glBindTexture(GL_TEXTURE_2D, modelMeshes[n].textureIndex);
         }
 
         // Faces
@@ -307,10 +309,14 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
         glEnableVertexAttribArray(vertexAttribute);
         glVertexAttribPointer(vertexAttribute, 3, GL_FLOAT, 0, 0, 0);
 
+        aiColor3D color(0.f, 0.f, 0.f);
+        aiMaterial material = *scene->mMaterials[0];
+        material.Get(AI_MATKEY_COLOR_DIFFUSE, color);
+
         // Texture coords
-        glBindBuffer(GL_ARRAY_BUFFER, modelMeshes[n].textureCoordBuffer);
-        glEnableVertexAttribArray(vertexUVAttribute);
-        glVertexAttribPointer(vertexUVAttribute, 2, GL_FLOAT, 0, 0, 0);
+//        glBindBuffer(GL_ARRAY_BUFFER, modelMeshes[n].textureCoordBuffer);
+//        glEnableVertexAttribArray(vertexUVAttribute);
+//        glVertexAttribPointer(vertexUVAttribute, 2, GL_FLOAT, 0, 0, 0);
 
         glDrawElements(GL_TRIANGLES, modelMeshes[n].numberOfFaces * 3, GL_UNSIGNED_INT, 0);
 

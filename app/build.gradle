@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'com.android.model.application'
 
 // path to OpenCV Android SDK Version 3.0
@@ -38,8 +36,8 @@ model {
     android {
 
         // 23 = Android Marshmallow
-        compileSdkVersion = 23
-        buildToolsVersion = '23.0.2'
+        compileSdkVersion = 25
+        buildToolsVersion = '25.0.2'
 
         defaultConfig {
             applicationId "com.anandmuralidhar.assimpandroid"
@@ -54,8 +52,9 @@ model {
 
         ndk {
             platformVersion = 19
-            moduleName = 'ModelAssimpNative' // this creates libModelAssimpNative.so and should be loaded in Java
-            stl        = 'gnustl_static'
+            moduleName = 'ModelAssimpNative'
+            // this creates libModelAssimpNative.so and should be loaded in Java
+            stl = 'gnustl_static'
             abiFilters.add('armeabi-v7a')
 
             // specify the path to jni code

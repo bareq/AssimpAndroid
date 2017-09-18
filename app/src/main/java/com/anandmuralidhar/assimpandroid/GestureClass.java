@@ -26,11 +26,15 @@ import android.view.View;
 
 public class GestureClass {
 
-   private GestureDetectorCompat mTapScrollDetector;
+    private GestureDetectorCompat mTapScrollDetector;
     private ScaleGestureDetector mScaleDetector;
+
     private native void DoubleTapNative();
+
     private native void ScrollNative(float distanceX, float distanceY, float positionX, float positionY);
+
     private native void ScaleNative(float scaleFactor);
+
     private native void MoveNative(float distanceX, float distanceY);
 
     public GestureClass(Activity activity) {
@@ -39,7 +43,6 @@ public class GestureClass {
         mTapScrollDetector = new GestureDetectorCompat(activity, new MyTapScrollListener());
         mScaleDetector = new ScaleGestureDetector(activity.getApplicationContext(),
                 new ScaleListener());
-
     }
 
     static int INVALID_POINTER_ID = -100;
@@ -65,7 +68,7 @@ public class GestureClass {
 
                 case MotionEvent.ACTION_MOVE: {
                     // track the drag only if two fingers are placed on screen
-                    if(mTwoFingerPointerId != INVALID_POINTER_ID) {
+                    if (mTwoFingerPointerId != INVALID_POINTER_ID) {
 
                         final float x = MotionEventCompat.getX(event, mTwoFingerPointerId);
                         final float y = MotionEventCompat.getY(event, mTwoFingerPointerId);
@@ -117,17 +120,17 @@ public class GestureClass {
     // this class detects double-tap gesture and tracks the drag gesture by single finger
     class MyTapScrollListener extends GestureDetector.SimpleOnGestureListener {
 
-        public boolean onDoubleTap (MotionEvent event) {
+        public boolean onDoubleTap(MotionEvent event) {
             DoubleTapNative();
             return true;
         }
 
         // function is called if user scrolls with one/two fingers
         // we ignore the call if two fingers are placed on screen
-        public boolean onScroll (MotionEvent e1, MotionEvent e2,
-                                 float distanceX, float distanceY) {
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                float distanceX, float distanceY) {
 
-            if(mTwoFingerPointerId == INVALID_POINTER_ID) {
+            if (mTwoFingerPointerId == INVALID_POINTER_ID) {
                 ScrollNative(distanceX, distanceY, e2.getX(), e2.getY());
             }
             return true;
@@ -143,5 +146,4 @@ public class GestureClass {
             return true;
         }
     }
-
 }

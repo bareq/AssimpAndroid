@@ -18,6 +18,7 @@ package com.anandmuralidhar.assimpandroid;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.graphics.Typeface;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
