@@ -17,7 +17,6 @@
 #include "assimpLoader.h"
 #include "myShader.h"
 #include "misc.h"
-#include "../../../../../../../../../Library/Android/sdk/ndk-bundle/platforms/android-24/arch-arm/usr/include/GLES/gl.h"
 #include <opencv2/opencv.hpp>
 
 
@@ -309,9 +308,9 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
         glEnableVertexAttribArray(vertexAttribute);
         glVertexAttribPointer(vertexAttribute, 3, GL_FLOAT, 0, 0, 0);
 
-        aiColor3D color(0.f, 0.f, 0.f);
-        aiMaterial material = *scene->mMaterials[0];
-        material.Get(AI_MATKEY_COLOR_DIFFUSE, color);
+//        aiColor3D color(0.f, 0.f, 0.f);
+//        aiMaterial material = *scene->mMaterials[0];
+//        material.Get(AI_MATKEY_COLOR_DIFFUSE, color);
 
         // Texture coords
 //        glBindBuffer(GL_ARRAY_BUFFER, modelMeshes[n].textureCoordBuffer);
