@@ -14,8 +14,7 @@ model {
                 headers.srcDir "src/main/externals/assimp-3.0/include"
                 // Inform Android Studio where lib is -- each ABI should have a lib file
                 binaries.withType(SharedLibraryBinary) {
-                    sharedLibraryFile = file("src/main/externals/assimp-3.0/libs/" +
-                            "${targetPlatform.getName()}/libassimp.so")
+                    sharedLibraryFile = file("src/main/externals/assimp-3.0/libs/libassimp.so")
                 }
             }
 
@@ -25,8 +24,7 @@ model {
                 headers.srcDir "src/main/externals/opencv-3.0.0/include"
                 // Inform Android Studio where lib is -- each ABI should have a lib file
                 binaries.withType(SharedLibraryBinary) {
-                    sharedLibraryFile = file("src/main/externals/opencv-3.0.0/libs/" +
-                            "${targetPlatform.getName()}/libopencv_java3.so")
+                    sharedLibraryFile = file("src/main/externals/opencv-3.0.0/libs/libopencv_java3.so")
                 }
             }
 
