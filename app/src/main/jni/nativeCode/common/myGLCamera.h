@@ -34,28 +34,42 @@ public:
             float nearPlaneDistance = 1.0f, // as large as possible
             float farPlaneDistance = 2000.0f // as small as possible
     );
-    void        SetModelPosition(std::vector<float> modelPosition);
-    void        SetAspectRatio(float aspect);
-    glm::mat4   GetMVP(){ return mvpMat; }
-    void        RotateModel(float distanceX, float distanceY, float endPositionX, float endPositionY);
-    void        ScaleModel(float scaleFactor);
-    void        TranslateModel(float distanceX, float distanceY);
+
+    void SetModelPosition(std::vector<float> modelPosition);
+
+    void SetAspectRatio(float aspect);
+
+    glm::mat4 GetMVP() { return mvpMat; }
+
+    glm::mat4 GetProjection() { return projectionViewMat; }
+
+    glm::mat4 GetRotation() { return rotateMat; }
+
+    glm::vec3 GetCameraPosition() { return cameraPosition; }
+
+    void RotateModel(float distanceX, float distanceY, float endPositionX, float endPositionY);
+
+    void ScaleModel(float scaleFactor);
+
+    void TranslateModel(float distanceX, float distanceY);
+
 
 private:
-    void        ComputeMVPMatrix();
+    void ComputeMVPMatrix();
 
-    float       FOV;
-    float       nearPlaneDistance, farPlaneDistance;
+    float FOV;
+    float nearPlaneDistance, farPlaneDistance;
 
-    glm::mat4   projectionViewMat;
-    glm::mat4   rotateMat, translateMat;
-    glm::mat4   modelMat;
-    glm::mat4   viewMat;
-    glm::mat4   mvpMat;     // ModelViewProjection: obtained by multiplying Projection, View, & Model
+    glm::mat4 projectionViewMat;
+    glm::mat4 rotateMat, translateMat;
+    glm::mat4 modelMat;
+    glm::mat4 viewMat;
+    glm::mat4 mvpMat;     // ModelViewProjection: obtained by multiplying Projection, View, & Model
 
     // six degrees-of-freedom of the model contained in a quaternion and x-y-z coordinates
-    glm::quat   modelQuaternion;
-    float       deltaX, deltaY, deltaZ;
+    glm::quat modelQuaternion;
+    float deltaX, deltaY, deltaZ;
+    glm::vec3 cameraPosition;
 };
 
 #endif //GLCAMERA_H

@@ -16,7 +16,6 @@
 
 
 #include "myGLCamera.h"
-#include "myLogger.h"
 #include "math.h"
 
 MyGLCamera::MyGLCamera(
@@ -33,15 +32,15 @@ MyGLCamera::MyGLCamera(
 
     this->nearPlaneDistance = nearPlaneDistance;
     this->farPlaneDistance = farPlaneDistance;
-    this->FOV       = FOV;
+    this->FOV = FOV;
 
     // 6DOF describing model's position
     deltaX = deltaY = deltaZ = 0;                  // translations
-    modelQuaternion = glm::quat(glm::vec3(0,0,0)); // rotation
+    modelQuaternion = glm::quat(glm::vec3(0, 0, 0)); // rotation
 
-    modelMat        = glm::mat4(1.0f);
-    translateMat    = glm::mat4(1.0f);
-    rotateMat       = glm::mat4(1.0f);
+    modelMat = glm::mat4(1.0f);
+    translateMat = glm::mat4(1.0f);
+    rotateMat = glm::mat4(1.0f);
     mvpMat = glm::mat4(1.0f); // projection is not known -> initialize MVP to identity
 }
 
@@ -71,8 +70,8 @@ void MyGLCamera::SetModelPosition(std::vector<float> modelPosition) {
     deltaY = modelPosition[1];
     deltaZ = modelPosition[2];
     float pitchAngle = modelPosition[3];
-    float yawAngle   = modelPosition[4];
-    float rollAngle  = modelPosition[5];
+    float yawAngle = modelPosition[4];
+    float rollAngle = modelPosition[5];
 
     modelQuaternion = glm::quat(glm::vec3(pitchAngle, yawAngle, rollAngle));
     rotateMat = glm::toMat4(modelQuaternion);
@@ -88,11 +87,11 @@ void MyGLCamera::SetModelPosition(std::vector<float> modelPosition) {
 void MyGLCamera::ComputeMVPMatrix() {
 
     translateMat = glm::mat4(1, 0, 0, 0,                  // col0
-                             0, 1, 0, 0,	              // col1
-                             0, 0, 1, 0,	              // col2
+                             0, 1, 0, 0,                  // col1
+                             0, 0, 1, 0,                  // col2
                              deltaX, deltaY, deltaZ, 1);  // col3
 
-    modelMat    = translateMat * rotateMat;
+    modelMat = translateMat * rotateMat;
     mvpMat = projectionViewMat * modelMat;
 }
 
@@ -124,7 +123,7 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY,
 
     // compute ending vector (using endPositionX, endPositionY)
     float dist = sqrt(fmin(1, endPositionX * endPositionX + endPositionY * endPositionY));
-    float positionZ = sqrt(1 - dist*dist);
+    float positionZ = sqrt(1 - dist * dist);
     glm::vec3 endVec = glm::vec3(endPositionX, endPositionY, positionZ);
     endVec = glm::normalize(endVec);
 
@@ -132,7 +131,7 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY,
     endPositionX += distanceX;
     endPositionY += distanceY;
     dist = sqrt(fmin(1, endPositionX * endPositionX + endPositionY * endPositionY));
-    positionZ = sqrt(1 - dist*dist);
+    positionZ = sqrt(1 - dist * dist);
     glm::vec3 beginVec = glm::vec3(endPositionX, endPositionY, positionZ);
     beginVec = glm::normalize(beginVec);
 
@@ -142,11 +141,14 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY,
 
     // compute angle between vectors using the dot product
     float dotProduct = fmax(fmin(glm::dot(beginVec, endVec), 1.), -1.);
-    float rotationAngle = TRANSLATION_TO_ANGLE*acos(dotProduct);
+    float rotationAngle = TRANSLATION_TO_ANGLE * acos(dotProduct);
 
     // compute quat using above
     modelQuaternion = glm::angleAxis(rotationAngle, rotationAxis);
-    rotateMat = glm::toMat4(modelQuaternion)*rotateMat;
+    rotateMat = glm::toMat4(modelQuaternion) * rotateMat;
+    cameraPosition = glm::vec3(cameraPosition.x + modelQuaternion.x * rotationAngle,
+                               cameraPosition.y + modelQuaternion.y * rotationAngle,
+                               cameraPosition.z + modelQuaternion.z + rotationAngle);
 
     ComputeMVPMatrix();
 }

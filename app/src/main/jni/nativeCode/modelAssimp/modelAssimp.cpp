@@ -31,7 +31,7 @@ ModelAssimp::ModelAssimp() {
 
     // create MyGLCamera object and set default position for the object
     myGLCamera = new MyGLCamera();
-    float pos[] = {0., 0., 0., 0.2, 0.5, 0.};
+    float pos[] = {0, 0, 0, 0, 0, 0};
     std::copy(&pos[0], &pos[5], std::back_inserter(modelDefaultPosition));
     myGLCamera->SetModelPosition(modelDefaultPosition);
 
@@ -84,7 +84,17 @@ void ModelAssimp::Render() {
     // clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 mvpMat = myGLCamera->GetMVP();
+    float x = sin(myGLCamera->GetCameraPosition().y) * 100;
+    float y = -cos(myGLCamera->GetCameraPosition().x) * 100;
+    float z = -cos(myGLCamera->GetCameraPosition().y) * 100;
+
+    glm::vec3 cameraPosition = glm::vec3(x, y, z);
+    glm::vec3 cameraPointing = glm::vec3(0, 0, 0);
+    glm::vec3 cameraUp = glm::vec3(0, 1, 0);
+
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraPointing, cameraUp);
+
+    glm::mat4 mvpMat = myGLCamera->GetProjection() * viewMatrix;
     modelObject->Render3DModel(&mvpMat);
 
     CheckGLError("ModelAssimp::Render");
