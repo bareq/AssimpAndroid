@@ -42,6 +42,7 @@ MyGLCamera::MyGLCamera(
     translateMat = glm::mat4(1.0f);
     rotateMat = glm::mat4(1.0f);
     mvpMat = glm::mat4(1.0f); // projection is not known -> initialize MVP to identity
+    this->cameraPosition = glm::vec3(0, 0, 100);
 }
 
 /**
@@ -101,6 +102,7 @@ void MyGLCamera::ComputeMVPMatrix() {
 void MyGLCamera::ScaleModel(float scaleFactor) {
 
     deltaZ += SCALE_TO_Z_TRANSLATION * (scaleFactor - 1);
+    this->cameraPosition.z = -deltaZ;
     ComputeMVPMatrix();
 }
 
@@ -146,8 +148,8 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY,
     // compute quat using above
     modelQuaternion = glm::angleAxis(rotationAngle, rotationAxis);
     rotateMat = glm::toMat4(modelQuaternion) * rotateMat;
-    cameraPosition = glm::vec3(cameraPosition.x + modelQuaternion.x * rotationAngle,
-                               cameraPosition.y + modelQuaternion.y * rotationAngle,
+    cameraPosition = glm::vec3(cameraPosition.x + distanceX,
+                               cameraPosition.y + distanceY,
                                cameraPosition.z + modelQuaternion.z + rotationAngle);
 
     ComputeMVPMatrix();

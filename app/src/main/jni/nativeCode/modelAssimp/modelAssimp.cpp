@@ -84,9 +84,9 @@ void ModelAssimp::Render() {
     // clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float x = sin(myGLCamera->GetCameraPosition().y) * 100;
-    float y = -cos(myGLCamera->GetCameraPosition().x) * 100;
-    float z = -cos(myGLCamera->GetCameraPosition().y) * 100;
+    float x = sin(myGLCamera->GetCameraPosition().x) * myGLCamera->GetCameraPosition().z;
+    float y = -cos(myGLCamera->GetCameraPosition().y) * myGLCamera->GetCameraPosition().z;
+    float z = -cos(myGLCamera->GetCameraPosition().x) * myGLCamera->GetCameraPosition().z;
 
     glm::vec3 cameraPosition = glm::vec3(x, y, z);
     glm::vec3 cameraPointing = glm::vec3(0, 0, 0);
