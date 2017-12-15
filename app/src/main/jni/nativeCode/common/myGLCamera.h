@@ -30,7 +30,7 @@ class MyGLCamera {
 public:
     MyGLCamera(
             float FOV = 45,          // in degrees
-            float zPosition = 10,    // camera's location on Z axis
+            float zPosition = 0,    // camera's location on Z axis
             float nearPlaneDistance = 1.0f, // as large as possible
             float farPlaneDistance = 2000.0f // as small as possible
     );
@@ -47,7 +47,7 @@ public:
 
     glm::vec3 GetCameraPosition() { return cameraPosition; }
 
-    void RotateModel(float distanceX, float distanceY, float endPositionX, float endPositionY);
+    void RotateModel(float distanceX, float distanceY);
 
     void ScaleModel(float scaleFactor);
 

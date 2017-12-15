@@ -42,7 +42,7 @@ MyGLCamera::MyGLCamera(
     translateMat = glm::mat4(1.0f);
     rotateMat = glm::mat4(1.0f);
     mvpMat = glm::mat4(1.0f); // projection is not known -> initialize MVP to identity
-    this->cameraPosition = glm::vec3(0, 0, 100);
+    this->cameraPosition = glm::vec3(M_PI / 2, 0, 100);
 }
 
 /**
@@ -110,48 +110,19 @@ void MyGLCamera::ScaleModel(float scaleFactor) {
  * Finger drag movements are converted to rotation of model by deriving a
  * quaternion from the drag movement
  */
-void MyGLCamera::RotateModel(float distanceX, float distanceY,
-                             float endPositionX, float endPositionY) {
-
-    // algo in brief---
-    // assume that a sphere with its center at (0,0), i.e., center of screen, and
-    // radius 1 is placed on the device.
-    // drag movement on the surface is translated to a drag on the imaginary sphere's surface
-    // since we know (x,y) coordinates of the drag, we only need to determine z-coordinate
-    // corresponding to the height of sphere's surface corresponding to the drag position.
-    // begin and end of drag define two points on sphere and we create two vectors joining those
-    // points with the origin (0,0).
-    // lastly we create a quaternion responsible for rotation between the two vectors.
-
-    // compute ending vector (using endPositionX, endPositionY)
-    float dist = sqrt(fmin(1, endPositionX * endPositionX + endPositionY * endPositionY));
-    float positionZ = sqrt(1 - dist * dist);
-    glm::vec3 endVec = glm::vec3(endPositionX, endPositionY, positionZ);
-    endVec = glm::normalize(endVec);
-
-    // compute starting vector by adding (distanceX, distanceY) to ending positions
-    endPositionX += distanceX;
-    endPositionY += distanceY;
-    dist = sqrt(fmin(1, endPositionX * endPositionX + endPositionY * endPositionY));
-    positionZ = sqrt(1 - dist * dist);
-    glm::vec3 beginVec = glm::vec3(endPositionX, endPositionY, positionZ);
-    beginVec = glm::normalize(beginVec);
-
-    // compute cross product of vectors to find axis of rotation
-    glm::vec3 rotationAxis = glm::cross(beginVec, endVec);
-    rotationAxis = glm::normalize(rotationAxis);
-
-    // compute angle between vectors using the dot product
-    float dotProduct = fmax(fmin(glm::dot(beginVec, endVec), 1.), -1.);
-    float rotationAngle = TRANSLATION_TO_ANGLE * acos(dotProduct);
-
-    // compute quat using above
-    modelQuaternion = glm::angleAxis(rotationAngle, rotationAxis);
-    rotateMat = glm::toMat4(modelQuaternion) * rotateMat;
-    cameraPosition = glm::vec3(cameraPosition.x + distanceX,
-                               cameraPosition.y + distanceY,
-                               cameraPosition.z + modelQuaternion.z + rotationAngle);
-
+void MyGLCamera::RotateModel(float distanceX, float distanceY) {
+    cameraPosition.x = cameraPosition.x - distanceX / 1000;
+    if (cameraPosition.x > 2 * M_PI) {
+        cameraPosition.x = cameraPosition.x - 2 * M_PI;
+    }
+    cameraPosition.y = cameraPosition.y - distanceY / 1000;
+    if (cameraPosition.y >= M_PI / 2) {
+        cameraPosition.y = M_PI / 2 - 0.001;
+    }
+    if (cameraPosition.y < 0) {
+        cameraPosition.y = 0;
+    }
+    cameraPosition = glm::vec3(cameraPosition.x, cameraPosition.y, 100);
     ComputeMVPMatrix();
 }
 

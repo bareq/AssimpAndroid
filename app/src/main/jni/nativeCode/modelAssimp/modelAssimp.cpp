@@ -20,6 +20,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <myJNIHelper.h>
+#include <JNIHelper.h>
 
 /**
  * Class constructor
@@ -84,9 +85,23 @@ void ModelAssimp::Render() {
     // clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float x = sin(myGLCamera->GetCameraPosition().x) * myGLCamera->GetCameraPosition().z;
-    float y = -cos(myGLCamera->GetCameraPosition().y) * myGLCamera->GetCameraPosition().z;
-    float z = -cos(myGLCamera->GetCameraPosition().x) * myGLCamera->GetCameraPosition().z;
+    float x = myGLCamera->GetCameraPosition().z * cos(myGLCamera->GetCameraPosition().x);
+    float y = myGLCamera->GetCameraPosition().z * sin(myGLCamera->GetCameraPosition().y);
+    float z = myGLCamera->GetCameraPosition().z * sin(myGLCamera->GetCameraPosition().x) *
+              cos(myGLCamera->GetCameraPosition().y);
+
+    char buffer[64];
+//    snprintf(buffer, sizeof buffer, "%f", y);
+
+//    LOGE(buffer);
+//
+//    snprintf(buffer, sizeof buffer, "%f", myGLCamera->GetCameraPosition().y);
+//
+//    LOGE(buffer);
+
+    snprintf(buffer, sizeof buffer, "%f", z);
+
+    LOGE(buffer);
 
     glm::vec3 cameraPosition = glm::vec3(x, y, z);
     glm::vec3 cameraPointing = glm::vec3(0, 0, 0);
@@ -126,9 +141,9 @@ void ModelAssimp::DoubleTapAction() {
 /**
  * rotate the model if user scrolls with one finger
  */
-void ModelAssimp::ScrollAction(float distanceX, float distanceY, float positionX, float positionY) {
+void ModelAssimp::ScrollAction(float distanceX, float distanceY) {
 
-    myGLCamera->RotateModel(distanceX, distanceY, positionX, positionY);
+    myGLCamera->RotateModel(distanceX, distanceY);
 }
 
 /**

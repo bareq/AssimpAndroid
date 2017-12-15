@@ -40,21 +40,15 @@ Java_com_anandmuralidhar_assimpandroid_GestureClass_DoubleTapNative(JNIEnv *env,
  */
 JNIEXPORT void JNICALL
 Java_com_anandmuralidhar_assimpandroid_GestureClass_ScrollNative(JNIEnv *env, jobject instance,
-                                                               jfloat distanceX, jfloat distanceY,
-                                                               jfloat positionX, jfloat positionY) {
+                                                                 jfloat distanceX, jfloat distanceY,
+                                                                 jfloat positionX,
+                                                                 jfloat positionY) {
 
     if (gAssimpObject == NULL) {
         return;
     }
-    // normalize movements on the screen wrt GL surface dimensions
-    // invert dY to be consistent with GLES conventions
-    float dX = (float) distanceX / gAssimpObject->GetScreenWidth();
-    float dY = -(float) distanceY / gAssimpObject->GetScreenHeight();
-    float posX = 2*positionX/ gAssimpObject->GetScreenWidth() - 1.;
-    float posY = -2*positionY / gAssimpObject->GetScreenHeight() + 1.;
-    posX = fmax(-1., fmin(1., posX));
-    posY = fmax(-1., fmin(1., posY));
-    gAssimpObject->ScrollAction(dX, dY, posX, posY);
+
+    gAssimpObject->ScrollAction(distanceX, distanceY);
 
 }
 
@@ -63,7 +57,7 @@ Java_com_anandmuralidhar_assimpandroid_GestureClass_ScrollNative(JNIEnv *env, jo
  */
 JNIEXPORT void JNICALL
 Java_com_anandmuralidhar_assimpandroid_GestureClass_ScaleNative(JNIEnv *env, jobject instance,
-                                                              jfloat scaleFactor) {
+                                                                jfloat scaleFactor) {
 
     if (gAssimpObject == NULL) {
         return;
