@@ -91,20 +91,12 @@ void ModelAssimp::Render() {
               cos(myGLCamera->GetCameraPosition().y);
 
     char buffer[64];
-//    snprintf(buffer, sizeof buffer, "%f", y);
-
-//    LOGE(buffer);
-//
-//    snprintf(buffer, sizeof buffer, "%f", myGLCamera->GetCameraPosition().y);
-//
-//    LOGE(buffer);
-
-    snprintf(buffer, sizeof buffer, "%f", z);
+    snprintf(buffer, sizeof buffer, "%f", myGLCamera->deltaX);
 
     LOGE(buffer);
 
     glm::vec3 cameraPosition = glm::vec3(x, y, z);
-    glm::vec3 cameraPointing = glm::vec3(0, 0, 0);
+    glm::vec3 cameraPointing = glm::vec3(myGLCamera->deltaX, myGLCamera->deltaY, 0);
     glm::vec3 cameraUp = glm::vec3(0, 1, 0);
 
     glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraPointing, cameraUp);

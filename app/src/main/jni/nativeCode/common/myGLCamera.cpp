@@ -100,7 +100,6 @@ void MyGLCamera::ComputeMVPMatrix() {
  * Simulate change in scale by pushing or pulling the model along Z axis
  */
 void MyGLCamera::ScaleModel(float scaleFactor) {
-
     this->cameraPosition.z -= SCALE_TO_Z_TRANSLATION * (scaleFactor - 1);
     ComputeMVPMatrix();
 }
@@ -129,7 +128,6 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY) {
  * displace model by changing x-y coordinates
  */
 void MyGLCamera::TranslateModel(float distanceX, float distanceY) {
-
     deltaX += XY_TRANSLATION_FACTOR * distanceX;
     deltaY += XY_TRANSLATION_FACTOR * distanceY;
     ComputeMVPMatrix();

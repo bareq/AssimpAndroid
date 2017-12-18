@@ -54,6 +54,8 @@ public:
     void TranslateModel(float distanceX, float distanceY);
 
 
+    float deltaX;
+    float deltaY;
 private:
     void ComputeMVPMatrix();
 
@@ -68,7 +70,7 @@ private:
 
     // six degrees-of-freedom of the model contained in a quaternion and x-y-z coordinates
     glm::quat modelQuaternion;
-    float deltaX, deltaY, deltaZ;
+    float deltaZ;
     glm::vec3 cameraPosition;
 };
 
