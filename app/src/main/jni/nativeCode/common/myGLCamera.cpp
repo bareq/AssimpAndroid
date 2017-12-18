@@ -101,8 +101,7 @@ void MyGLCamera::ComputeMVPMatrix() {
  */
 void MyGLCamera::ScaleModel(float scaleFactor) {
 
-    deltaZ += SCALE_TO_Z_TRANSLATION * (scaleFactor - 1);
-    this->cameraPosition.z = -deltaZ;
+    this->cameraPosition.z -= SCALE_TO_Z_TRANSLATION * (scaleFactor - 1);
     ComputeMVPMatrix();
 }
 
@@ -122,7 +121,7 @@ void MyGLCamera::RotateModel(float distanceX, float distanceY) {
     if (cameraPosition.y < 0) {
         cameraPosition.y = 0;
     }
-    cameraPosition = glm::vec3(cameraPosition.x, cameraPosition.y, 100);
+    cameraPosition = glm::vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     ComputeMVPMatrix();
 }
 
