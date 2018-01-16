@@ -14,9 +14,11 @@
  *    limitations under the License.
  */
 
+using namespace std;
+
 #include "assimpLoader.h"
 #include "myShader.h"
-#include "misc.h"
+#include "myJNIHelper.h"
 #include <opencv2/opencv.hpp>
 
 
@@ -50,6 +52,14 @@ AssimpLoader::~AssimpLoader() {
         importerPtr = NULL;
     }
     scene = NULL; // gets deleted along with importerPtr
+}
+
+string getPathForMaterial(string materialName) {
+    string texturePath;
+    return gHelperObject->ExtractAssetReturnFilename("texture/" + materialName + ".jpg",
+                                                     texturePath) ? texturePath
+                                                                  : getPathForMaterial(
+                    "Brick_Classic");
 }
 
 /**
@@ -128,15 +138,12 @@ void AssimpLoader::GenerateGLBuffers() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        // copy texture index (= texture name in GL) for the mesh from textureNameMap
-        aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
-        aiString texturePath;    //contains filename of texture
-        if (AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath)) {
-            unsigned int textureId = textureNameMap[texturePath.data];
-            newMeshInfo.textureIndex = textureId;
-        } else {
-            newMeshInfo.textureIndex = 0;
-        }
+
+        aiString textureName;
+        scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, textureName);
+        aiString texturePath = aiString(getPathForMaterial(textureName.data));
+        unsigned int textureId = textureNameMap[texturePath.data];
+        newMeshInfo.textureIndex = textureId;
 
         modelMeshes.push_back(newMeshInfo);
     }
@@ -153,19 +160,10 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
     for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
 
         int textureIndex = 0;
-        aiString textureFilename;
-        aiReturn isTexturePresent = scene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE,
-                                                                     textureIndex,
-                                                                     &textureFilename);
-        while (isTexturePresent == AI_SUCCESS) {
-            //fill map with textures, OpenGL image ids set to 0
-            textureNameMap.insert(std::pair<std::string, GLuint>(textureFilename.data, 0));
-
-            // more textures? more than one texture could be associated with a material
-            textureIndex++;
-            isTexturePresent = scene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE,
-                                                                textureIndex, &textureFilename);
-        }
+        aiString textureName;
+        scene->mMaterials[m]->Get(AI_MATKEY_NAME, textureName);
+        aiString textureFilename = aiString(getPathForMaterial(textureName.data));
+        textureNameMap.insert(std::pair<std::string, GLuint>(textureFilename.data, 0));
     }
 
     int numTextures = (int) textureNameMap.size();
@@ -177,7 +175,6 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
 
     // Extract the directory part from the file name
     // will be used to read the texture
-    std::string modelDirectoryName = GetDirectoryName(modelFilename);
 
     // iterate over the textures, read them using OpenCV, load into GL
     std::map<std::string, GLuint>::iterator textureIterator = textureNameMap.begin();
@@ -185,12 +182,11 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
     for (; textureIterator != textureNameMap.end(); ++i, ++textureIterator) {
 
         std::string textureFilename = (*textureIterator).first;  // get filename
-        std::string textureFullPath = modelDirectoryName + "/" + textureFilename;
         (*textureIterator).second = textureGLNames[i];      // save texture id for filename in map
 
         // load the texture using OpenCV
-        MyLOGI("Loading texture %s", textureFullPath.c_str());
-        cv::Mat textureImage = cv::imread(textureFullPath);
+        MyLOGI("Loading texture %s", (*textureIterator).first.c_str());
+        cv::Mat textureImage = cv::imread((*textureIterator).first);
         if (!textureImage.empty()) {
 
             // opencv reads textures in BGR format, change to RGB for GL
@@ -282,8 +278,6 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
         return;
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glUseProgram(shaderProgramID);
     glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *) mvpMat);
 
@@ -308,14 +302,10 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
         glEnableVertexAttribArray(vertexAttribute);
         glVertexAttribPointer(vertexAttribute, 3, GL_FLOAT, 0, 0, 0);
 
-//        aiColor3D color(0.f, 0.f, 0.f);
-//        aiMaterial material = *scene->mMaterials[0];
-//        material.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-
         // Texture coords
-//        glBindBuffer(GL_ARRAY_BUFFER, modelMeshes[n].textureCoordBuffer);
-//        glEnableVertexAttribArray(vertexUVAttribute);
-//        glVertexAttribPointer(vertexUVAttribute, 2, GL_FLOAT, 0, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, modelMeshes[n].textureCoordBuffer);
+        glEnableVertexAttribArray(vertexUVAttribute);
+        glVertexAttribPointer(vertexUVAttribute, 2, GL_FLOAT, 0, 0, 0);
 
         glDrawElements(GL_TRIANGLES, modelMeshes[n].numberOfFaces * 3, GL_UNSIGNED_INT, 0);
 
@@ -328,4 +318,3 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
     CheckGLError("AssimpLoader::renderObject() ");
 
 }
-
