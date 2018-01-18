@@ -21,6 +21,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <opencv2/core/mat.hpp>
 
 #include "myGLM.h"
 #include "myGLFunctions.h"
@@ -47,6 +48,8 @@ public:
 
     void Delete3DModel();
 
+    GLuint *cubeTextureName;
+
 private:
     void GenerateGLBuffers();
 
@@ -61,7 +64,20 @@ private:
 
     GLuint vertexAttribute, vertexUVAttribute;     // attributes for shader variables
     GLuint shaderProgramID;
+    GLuint skyboxShaderId;
     GLint mvpLocation, textureSamplerLocation;    // location of MVP in the shader
+    void loadCubeTextures();
+
+    cv::Mat loadTexture(std::string fileName);
+
+    void loadCubeShaders();
+
+    GLint location_projectionMatrix;
+    GLint location_viewMatrix;
+
+    void renderSkyBox();
+
+
 };
 
 #endif //ASSIMPLOADER_H

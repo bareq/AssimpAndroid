@@ -19,6 +19,7 @@ using namespace std;
 #include "assimpLoader.h"
 #include "myShader.h"
 #include "myJNIHelper.h"
+#include "skyBoxCoords.h"
 #include <opencv2/opencv.hpp>
 
 
@@ -38,6 +39,7 @@ AssimpLoader::AssimpLoader() {
     vertexUVAttribute = GetAttributeLocation(shaderProgramID, "vertexUV");
     mvpLocation = GetUniformLocation(shaderProgramID, "mvpMat");
     textureSamplerLocation = GetUniformLocation(shaderProgramID, "textureSampler");
+
 
     CheckGLError("AssimpLoader::AssimpLoader");
 }
@@ -59,6 +61,15 @@ string getPathForMaterial(string materialName) {
     return gHelperObject->ExtractAssetReturnFilename("texture/" + materialName + ".jpg",
                                                      texturePath) ? texturePath
                                                                   : getPathForMaterial(
+                    "Brick_Classic");
+}
+
+string getPathForCubeTexture(string materialName) {
+    string texturePath;
+    return gHelperObject->ExtractAssetReturnFilename(
+            "texture/CubeMaps/Sky1/" + materialName + ".png",
+            texturePath) ? texturePath
+                         : getPathForMaterial(
                     "Brick_Classic");
 }
 
@@ -227,30 +238,69 @@ bool AssimpLoader::LoadTexturesToGL(std::string modelFilename) {
  * does not handle material properties (like diffuse, specular, etc.)
  */
 bool AssimpLoader::Load3DModel(std::string modelFilename) {
-
     MyLOGI("Scene will be imported now");
     scene = importerPtr->ReadFile(modelFilename, aiProcessPreset_TargetRealtime_Quality |
                                                  aiProcess_PreTransformVertices);
-
-    // Check if import failed
     if (!scene) {
         std::string errorString = importerPtr->GetErrorString();
         MyLOGE("Scene import failed: %s", errorString.c_str());
         return false;
     }
     MyLOGI("Imported %s successfully.", modelFilename.c_str());
-
     if (!LoadTexturesToGL(modelFilename)) {
         MyLOGE("Unable to load textures");
         return false;
     }
+//    loadCubeShaders();
+    loadCubeTextures();
     MyLOGI("Loaded textures successfully");
-
     GenerateGLBuffers();
     MyLOGI("Loaded vertices and texture coords successfully");
-
     isObjectLoaded = true;
     return true;
+}
+
+void AssimpLoader::loadCubeShaders() {
+    std::string vertexShader = "shaders/skyboxVertexShader.txt";
+    std::string fragmentShader = "shaders/skyboxFragmentShader.txt";
+    skyboxShaderId = LoadShaders(vertexShader, fragmentShader);
+    glBindAttribLocation(skyboxShaderId, 0, "position");
+    location_projectionMatrix = glGetUniformLocation(skyboxShaderId, "projectionMatrix");
+    location_viewMatrix = glGetUniformLocation(skyboxShaderId, "viewMatrix");
+}
+
+void AssimpLoader::loadCubeTextures() {
+    string files[6] = {
+            getPathForCubeTexture("miramar_rt"),
+            getPathForCubeTexture("miramar_lf"),
+            getPathForCubeTexture("miramar_up"),
+            getPathForCubeTexture("miramar_dn"),
+            getPathForCubeTexture("miramar_bk"),
+            getPathForCubeTexture("miramar_ft")
+    };
+    cubeTextureName = new GLuint[1];
+    glGenTextures(1, cubeTextureName);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTextureName[0]);
+    for (int i = 0; i < 6; i++) {
+        cv::Mat textureImage = loadTexture(files[i]);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, textureImage.cols,
+                     textureImage.rows, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                     textureImage.data);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+cv::Mat AssimpLoader::loadTexture(string fileName) {
+    cv::Mat textureImage = cv::imread(fileName);
+    if (!textureImage.empty()) {
+        cv::cvtColor(textureImage, textureImage, CV_BGR2RGB);
+        cv::flip(textureImage, textureImage, 0);
+    } else {
+        MyLOGE("Cube texture load error");
+    }
+    return textureImage;
 }
 
 /**
@@ -318,3 +368,5 @@ void AssimpLoader::Render3DModel(glm::mat4 *mvpMat) {
     CheckGLError("AssimpLoader::renderObject() ");
 
 }
+
+

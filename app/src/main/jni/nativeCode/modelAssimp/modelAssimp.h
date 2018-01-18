@@ -58,6 +58,8 @@ private:
     std::vector<float> modelDefaultPosition;
     MyGLCamera *myGLCamera;
     AssimpLoader *modelObject;
+
+    void renderSkyBox();
 };
 
 #endif //MODELASSIMP_H

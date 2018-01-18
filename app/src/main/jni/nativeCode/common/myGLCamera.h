@@ -56,6 +56,7 @@ public:
 
     float deltaX;
     float deltaY;
+    glm::mat4 viewMat;
 private:
     void ComputeMVPMatrix();
 
@@ -65,7 +66,7 @@ private:
     glm::mat4 projectionViewMat;
     glm::mat4 rotateMat, translateMat;
     glm::mat4 modelMat;
-    glm::mat4 viewMat;
+
     glm::mat4 mvpMat;     // ModelViewProjection: obtained by multiplying Projection, View, & Model
 
     // six degrees-of-freedom of the model contained in a quaternion and x-y-z coordinates

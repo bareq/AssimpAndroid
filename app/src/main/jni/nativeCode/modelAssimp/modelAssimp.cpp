@@ -21,6 +21,7 @@
 #include <opencv2/opencv.hpp>
 #include <myJNIHelper.h>
 #include <JNIHelper.h>
+#include <skyBoxCoords.h>
 
 /**
  * Class constructor
@@ -104,6 +105,8 @@ void ModelAssimp::Render() {
     glm::mat4 mvpMat = myGLCamera->GetProjection() * viewMatrix;
     modelObject->Render3DModel(&mvpMat);
 
+    renderSkyBox();
+
     CheckGLError("ModelAssimp::Render");
 
 }
@@ -152,4 +155,16 @@ void ModelAssimp::ScaleAction(float scaleFactor) {
 void ModelAssimp::MoveAction(float distanceX, float distanceY) {
 
     myGLCamera->TranslateModel(distanceX, distanceY);
+}
+
+void ModelAssimp::renderSkyBox() {
+    GLuint cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glEnableVertexAttribArray(0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, modelObject->cubeTextureName[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
 }
