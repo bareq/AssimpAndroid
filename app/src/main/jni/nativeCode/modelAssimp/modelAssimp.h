@@ -60,6 +60,14 @@ private:
     AssimpLoader *modelObject;
 
     void renderSkyBox();
+
+    void prepareSkybox();
+
+    GLuint cubeVAO;
+
+    void loadCubeShaders();
+
+    GLuint skyboxShaderId;
 };
 
 #endif //MODELASSIMP_H

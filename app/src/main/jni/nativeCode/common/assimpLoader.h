@@ -50,6 +50,7 @@ public:
 
     GLuint *cubeTextureName;
 
+    GLint mvpLocation;
 private:
     void GenerateGLBuffers();
 
@@ -64,8 +65,8 @@ private:
 
     GLuint vertexAttribute, vertexUVAttribute;     // attributes for shader variables
     GLuint shaderProgramID;
-    GLuint skyboxShaderId;
-    GLint mvpLocation, textureSamplerLocation;    // location of MVP in the shader
+    GLint textureSamplerLocation;
+    // location of MVP in the shader
     void loadCubeTextures();
 
     cv::Mat loadTexture(std::string fileName);

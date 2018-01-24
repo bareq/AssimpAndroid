@@ -9,7 +9,7 @@
 #include <GLES2/gl2.h>
 
 class skyBoxCoords {
-    const float SIZE = 500.0f;
+    const float SIZE = 100.0f;
     GLfloat VERTICES[108] = {
             -SIZE, SIZE, -SIZE,
             -SIZE, -SIZE, -SIZE,

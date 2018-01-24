@@ -71,7 +71,10 @@ void ModelAssimp::PerformGLInits() {
         return;
     }
 
+    prepareSkybox();
+
     modelObject->Load3DModel(objFilename);
+
 
     CheckGLError("ModelAssimp::PerformGLInits");
     initsDone = true;
@@ -102,10 +105,10 @@ void ModelAssimp::Render() {
 
     glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraPointing, cameraUp);
 
-    glm::mat4 mvpMat = myGLCamera->GetProjection() * viewMatrix;
-    modelObject->Render3DModel(&mvpMat);
-
     renderSkyBox();
+
+    glm::mat4 mvpMat = myGLCamera->GetProjection() * viewMatrix;
+//    modelObject->Render3DModel(&mvpMat);
 
     CheckGLError("ModelAssimp::Render");
 
@@ -158,13 +161,25 @@ void ModelAssimp::MoveAction(float distanceX, float distanceY) {
 }
 
 void ModelAssimp::renderSkyBox() {
-    GLuint cubeVAO;
+    glBlendColor(1, 0, 0, 0);
+    glDepthMask(GL_FALSE);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *modelObject->cubeTextureName);
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDepthMask(GL_TRUE);
+}
+
+void ModelAssimp::prepareSkybox() {
+    GLuint cubeVBO;
+    glGenBuffers(1, &cubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, 3 * 36 * sizeof(float), skyBoxCoords().getVertices(),
+                 GL_STATIC_DRAW);
     glGenVertexArrays(1, &cubeVAO);
     glBindVertexArray(cubeVAO);
     glEnableVertexAttribArray(0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, modelObject->cubeTextureName[0]);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glDisableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
 }

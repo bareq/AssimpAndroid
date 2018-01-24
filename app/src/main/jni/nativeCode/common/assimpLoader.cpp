@@ -251,22 +251,12 @@ bool AssimpLoader::Load3DModel(std::string modelFilename) {
         MyLOGE("Unable to load textures");
         return false;
     }
-//    loadCubeShaders();
     loadCubeTextures();
     MyLOGI("Loaded textures successfully");
     GenerateGLBuffers();
     MyLOGI("Loaded vertices and texture coords successfully");
     isObjectLoaded = true;
     return true;
-}
-
-void AssimpLoader::loadCubeShaders() {
-    std::string vertexShader = "shaders/skyboxVertexShader.txt";
-    std::string fragmentShader = "shaders/skyboxFragmentShader.txt";
-    skyboxShaderId = LoadShaders(vertexShader, fragmentShader);
-    glBindAttribLocation(skyboxShaderId, 0, "position");
-    location_projectionMatrix = glGetUniformLocation(skyboxShaderId, "projectionMatrix");
-    location_viewMatrix = glGetUniformLocation(skyboxShaderId, "viewMatrix");
 }
 
 void AssimpLoader::loadCubeTextures() {
@@ -278,14 +268,14 @@ void AssimpLoader::loadCubeTextures() {
             getPathForCubeTexture("miramar_bk"),
             getPathForCubeTexture("miramar_ft")
     };
-    cubeTextureName = new GLuint[1];
+    cubeTextureName = new GLuint();
     glGenTextures(1, cubeTextureName);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTextureName[0]);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *cubeTextureName);
     for (int i = 0; i < 6; i++) {
         cv::Mat textureImage = loadTexture(files[i]);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, textureImage.cols,
-                     textureImage.rows, 0, GL_RGB, GL_UNSIGNED_BYTE,
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, textureImage.cols,
+                     textureImage.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                      textureImage.data);
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
